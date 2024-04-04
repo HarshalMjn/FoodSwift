@@ -2,8 +2,10 @@ import React from 'react'
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useCart, useDispatchCart } from '../components/ContextReducer';
 import axios from "axios";
+import { useState } from 'react';
 
 export default function Cart() {
+  const [myOrders, setMyOrders] = useState([]);
   let data = useCart();
   let dispatch = useDispatchCart();
   if (data.length === 0) {
@@ -40,6 +42,15 @@ export default function Cart() {
   //   }
   // }
 
+  const fetchMyOrders = async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/myOrderData", { email: localStorage.getItem("userEmail") });
+      setMyOrders(response.data.orderData);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleCheckOut = async () => {
     try {
       const orderUrl = "http://localhost:5000/api/payment/orders";
@@ -51,6 +62,7 @@ export default function Cart() {
     } catch(error) {
 
     }
+    
   }
 
   const initPayment = (data) => {
@@ -66,6 +78,8 @@ export default function Cart() {
             const verifyUrl = "http://localhost:5000/api/payment/verify";
             const {data} = await axios.post(verifyUrl, response);
             console.log(data);
+            dispatch({ type: "DROP" });
+            fetchMyOrders();
         } catch(error) {
           console.log(error);
         }
@@ -73,10 +87,14 @@ export default function Cart() {
       theme: {
         color:"3399c",
       }
+      
 
     };
     const  rzp1 = new window.Razorpay(options);
     rzp1.open();
+   
+
+    
   }
 
   let totalPrice = data.reduce((total, food) => total + food.price, 0)
