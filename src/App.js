@@ -3,6 +3,9 @@ import '../node_modules/bootstrap-dark-5/dist/css/bootstrap-dark.min.css'  //npm
 import '../node_modules/bootstrap/dist/js/bootstrap.bundle';
 import "../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js";
 
+
+
+
 import Home from './screen/Home.js';
 import {
   BrowserRouter as Router,
@@ -19,6 +22,10 @@ import AboutUs from './screen/AboutUs.js';
 
 
 function App() {
+
+  
+
+
   return (
     <CartProvider>
       <Router>

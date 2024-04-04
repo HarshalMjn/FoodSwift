@@ -181,7 +181,28 @@ app.post('/usermsg',
     }
   });
 
+//rozrpay
+
+
+const cors = require("cors")
+const dotenv = require('dotenv');
+const paymentRoutes = require("./routes/payment")
+dotenv.config();
+
+//middlerware
+app.use(express.json());
+app.use(cors());
+
+app.use("/api/payment/", paymentRoutes);
+
+
+
+
+
 app.listen(port, () => {
   console.log("Example app listening to port ", port)
 })
+
+
+
 

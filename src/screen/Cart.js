@@ -1,6 +1,8 @@
 import React from 'react'
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useCart, useDispatchCart } from '../components/ContextReducer';
+import axios from "axios";
+
 export default function Cart() {
   let data = useCart();
   let dispatch = useDispatchCart();
@@ -16,26 +18,65 @@ export default function Cart() {
   //   dispatch({type:"REMOVE",index:index})
   // }
 
+  // const handleCheckOut = async () => {
+  //   let userEmail = localStorage.getItem("userEmail");
+  //   // console.log(data,localStorage.getItem("userEmail"),new Date())
+  //   let response = await fetch("http://localhost:5000/orderData", {
+  //     // credentials: 'include',
+  //     // Origin:"http://localhost:3000/login",
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify({
+  //       order_data: data,
+  //       email: userEmail,
+  //       order_date: new Date().toDateString()
+  //     })
+  //   });
+  //   console.log("JSON RESPONSE:::::", response.status)
+  //   if (response.status === 200) {
+  //     dispatch({ type: "DROP" })
+  //   }
+  // }
+
   const handleCheckOut = async () => {
-    let userEmail = localStorage.getItem("userEmail");
-    // console.log(data,localStorage.getItem("userEmail"),new Date())
-    let response = await fetch("http://localhost:5000/orderData", {
-      // credentials: 'include',
-      // Origin:"http://localhost:3000/login",
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        order_data: data,
-        email: userEmail,
-        order_date: new Date().toDateString()
-      })
-    });
-    console.log("JSON RESPONSE:::::", response.status)
-    if (response.status === 200) {
-      dispatch({ type: "DROP" })
+    try {
+      const orderUrl = "http://localhost:5000/api/payment/orders";
+      const {data} = await axios.post(orderUrl, {amount:totalPrice});
+      console.log(data);
+      initPayment(data.data)
+      
+
+    } catch(error) {
+
     }
+  }
+
+  const initPayment = (data) => {
+    const options = {
+      key : "rzp_test_ju1RtRmAqH3Y6B",
+      amount:data.amount,
+      currency:data.currency,
+     
+      description:"Test Transaction",
+      order_id:data.id,
+      handler: async (response) => {
+        try {
+            const verifyUrl = "http://localhost:5000/api/payment/verify";
+            const {data} = await axios.post(verifyUrl, response);
+            console.log(data);
+        } catch(error) {
+          console.log(error);
+        }
+      },
+      theme: {
+        color:"3399c",
+      }
+
+    };
+    const  rzp1 = new window.Razorpay(options);
+    rzp1.open();
   }
 
   let totalPrice = data.reduce((total, food) => total + food.price, 0)
